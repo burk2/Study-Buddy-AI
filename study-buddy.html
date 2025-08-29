@@ -1,1 +1,276 @@
+<!-- File: study-buddy.html -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Study Buddy — Real</title>
+<style>
+/* (Styles are compacted but follow the Drax 2025+ guidelines: gradients, rounded corners, shadows) */
+:root{--bg1:linear-gradient(180deg,#071023,#0b1220);--card-grad:linear-gradient(135deg,#ff5f7a 0%,#7c3aed 100%);--muted:#bfc8cf;--radius:14px}
+html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;color:#e6eef6;background:var(--bg1)}
+.app{max-width:1100px;margin:28px auto;padding:28px;display:grid;grid-template-columns:320px 1fr;gap:20px;align-items:start}
+.kb{background:rgba(255,255,255,0.02);padding:18px;border-radius:var(--radius);box-shadow:0 6px 30px rgba(2,6,23,0.6);position:relative}
+.kb h3{margin:0;color:#fff} .chip{display:inline-block;padding:6px 10px;background:rgba(255,255,255,0.03);border-radius:999px;margin:6px 6px 0 0;font-size:12px;color:var(--muted)}
+.kb button{display:block;width:100%;text-align:left;padding:10px;border-radius:10px;border:1px dashed rgba(255,255,255,0.03);background:transparent;color:var(--muted);cursor:pointer;margin-bottom:8px}
+.toggle-tab{position:absolute;right:-34px;top:120px;width:36px;height:120px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;transform:rotate(-90deg);background:linear-gradient(180deg,#ff5f7a,#7c3aed);color:#fff;font-weight:700}
+
+/* Main */
+.panel{background:rgba(255,255,255,0.02);border-radius:var(--radius);padding:18px;box-shadow:0 6px 30px rgba(2,6,23,0.6);display:flex;flex-direction:column;height:calc(100vh - 120px)}
+.header{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.logo{width:56px;height:56px;border-radius:12px;background:var(--card-grad);display:flex;align-items:center;justify-content:center}
+.title h1{margin:0;font-size:18px} .title p{margin:2px 0 0 0;color:var(--muted);font-size:13px}
+.btn{padding:10px 14px;border-radius:12px;background:linear-gradient(90deg,#1f2937,#111827);border:1px solid rgba(255,255,255,0.03);color:#fff;cursor:pointer}
+.btn.primary{background:linear-gradient(90deg,#7c3aed,#ff5f7a);border:none;color:white}
+
+/* Chat */
+.chat{flex:1;overflow:auto;padding:12px;border-radius:10px;background:linear-gradient(180deg,rgba(255,255,255,0.005),transparent);margin-bottom:12px}
+.msg{display:flex;gap:12px;align-items:flex-start;margin:8px 0}
+.avatar{width:44px;height:44px;border-radius:10px;background:rgba(255,255,255,0.03);display:flex;align-items:center;justify-content:center}
+.bubble{max-width:75%;padding:12px 14px;border-radius:12px;background:linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.01));color:#e7f0ff;font-size:14px;line-height:1.45}
+.bubble.user{background:linear-gradient(180deg,#fff,#f7f8fb);color:#0b1220}
+.typing{width:60px;height:8px;border-radius:999px;background:linear-gradient(90deg,#fff4,#fff0);position:relative;overflow:hidden}
+.typing::after{content:'';position:absolute;left:-30px;top:0;height:100%;width:30px;background:linear-gradient(90deg,transparent,#ffffff55,transparent);animation:typingShimmer 1s linear infinite}
+@keyframes typingShimmer{to{left:100%}}
+
+/* composer */
+.composer{display:flex;gap:10px;align-items:center;padding:12px;border-radius:12px;background:linear-gradient(90deg,rgba(255,255,255,0.012),transparent);border:1px solid rgba(255,255,255,0.02)}
+.composer textarea{flex:1;background:transparent;border:none;color:inherit;resize:none;height:56px;font-size:14px;padding:8px;outline:none}
+.modes{display:flex;gap:8px}
+.mode{padding:6px 10px;border-radius:10px;background:rgba(255,255,255,0.02);cursor:pointer;font-size:13px;color:var(--muted)}
+.mode.active{background:linear-gradient(90deg,#7c3aed,#ff5f7a);color:white;border:none}
+.footer-note{font-size:12px;color:var(--muted);text-align:center;margin-top:8px}
+
+/* small */
+.u-row{display:flex;gap:8px;align-items:center}
+.small{font-size:13px;color:var(--muted)}
+
+/* responsive */
+@media (max-width:980px){.app{grid-template-columns:1fr;padding:18px}.kb{order:2;margin-top:12px}.panel{height:calc(100vh - 160px)}}
+</style>
+</head>
+<body>
+<div class="app" role="application" aria-label="Study Buddy">
+  <aside class="kb" id="kb">
+    <h3>Knowledge & Memory</h3>
+    <p><strong>Sample memory:</strong> Weak on Algebra II; prefers short examples.</p>
+    <div style="margin-top:10px">
+      <span class="chip">Flashcards</span>
+      <span class="chip">Summaries</span>
+      <span class="chip">Tutor Mode</span>
+    </div>
+    <div class="prompt-sample" style="margin-top:12px">
+      <h4 style="color:#fff;margin:0 0 8px 0">Try a prompt</h4>
+      <button onclick="useSample('Explain Newton\\'s Second Law like I\\'m 12')">Explain Newton's 2nd law (simple)</button>
+      <button onclick="useSample('Create 5 flashcards about photosynthesis')">Create 5 flashcards (biology)</button>
+      <button onclick="useSample('Quiz me on integration by parts, 5 questions')">Quiz: integration by parts</button>
+    </div>
+    <div style="margin-top:14px">
+      <h4 style="color:#fff;margin:0 0 6px 0">File Tools</h4>
+      <p class="small">Upload PDF notes to extract text and generate flashcards or summaries.</p>
+      <input type="file" id="pdfFile" accept="application/pdf" style="width:100%;margin-top:8px"/>
+      <div style="margin-top:8px" class="u-row">
+        <button class="btn" id="uploadPdfBtn">Upload & Extract</button>
+        <button class="btn" id="extractDemoBtn">Demo extract</button>
+      </div>
+    </div>
+    <div style="margin-top:14px">
+      <h4 style="color:#fff;margin:0 0 6px 0">FAQ & Tips</h4>
+      <p class="small">• Use "Tutor" mode to get the assistant to ask questions back.</p>
+      <p class="small">• Use Download to export flashcards (CSV) for Anki import.</p>
+    </div>
+    <div class="toggle-tab" id="toggleKb">KB</div>
+  </aside>
+
+  <section class="panel">
+    <div class="header">
+      <div class="logo" title="Study Buddy">
+        <svg width="38" height="38" viewBox="0 0 64 64" fill="none"><rect width="64" height="64" rx="12" fill="#fff" opacity="0.06"/></svg>
+      </div>
+      <div class="title">
+        <h1>Study Buddy</h1>
+        <p>Smart study helper — Tutor • Quiz • Explain</p>
+      </div>
+      <div class="u-row" style="margin-left:auto">
+        <div style="display:flex;flex-direction:column;align-items:flex-end">
+          <label class="small">Mode</label>
+          <div style="display:flex;gap:8px">
+            <label style="color:var(--muted);font-size:12px"><input type="checkbox" id="useBackend" /> Use backend (recommended)</label>
+          </div>
+        </div>
+        <button class="btn" onclick="openSettings()">Settings</button>
+        <button class="btn primary" id="downloadBtn">Download Prototype</button>
+      </div>
+    </div>
+
+    <main class="chat" id="chat" aria-live="polite" role="log"></main>
+
+    <div class="composer" role="region" aria-label="Chat composer">
+      <textarea id="input" placeholder="Ask a question, paste notes, or request flashcards..."></textarea>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div class="modes" role="tablist" aria-label="Modes">
+          <div class="mode active" data-mode="explain">Explain</div>
+          <div class="mode" data-mode="tutor">Tutor</div>
+          <div class="mode" data-mode="quiz">Quiz</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="btn" id="clearBtn">Clear</button>
+          <button class="btn" id="exportFlashcardsBtn">Export Flashcards</button>
+          <button class="btn primary" id="sendBtn">Send</button>
+        </div>
+      </div>
+    </div>
+    <div class="footer-note">This prototype works in demo mode (no keys) or live mode via backend. For production, host the backend and keep keys server-side.</div>
+  </section>
+</div>
+
+<!-- modal root -->
+<div id="modalRoot" style="position:fixed;left:0;top:0;right:0;bottom:0;display:none;align-items:center;justify-content:center;">
+  <div style="background:rgba(0,0,0,0.55);backdrop-filter:blur(4px);position:absolute;inset:0;"></div>
+  <div id="modal" style="position:relative;z-index:10;width:92%;max-width:720px;border-radius:12px;padding:18px;background:linear-gradient(180deg,#071023,#0b1220);box-shadow:0 20px 60px rgba(2,6,23,0.8);border:1px solid rgba(255,255,255,0.03);"></div>
+</div>
+
+<script>
+/* Frontend JS: chat UI, demo fallback, backend integration, PDF upload, flashcard export */
+
+const state = { apiRoot: (location.hostname==='localhost' || location.hostname==='127.0.0.1') ? 'http://localhost:8000' : '', apiKeyPresent:false, running:false };
+const chatEl = document.getElementById('chat');
+const inputEl = document.getElementById('input');
+
+function el(tag, cls, inner){ const e=document.createElement(tag); if(cls)e.className=cls; if(inner!==undefined)e.innerHTML=inner; return e; }
+function addMessage({who='assistant', text='', typing=false}){
+  const wrap = el('div','msg');
+  const avatar = el('div','avatar');
+  avatar.innerHTML = who === 'user' ? '<svg width="28" height="28"><circle cx="14" cy="8" r="6" fill="#111827"/></svg>' : '<svg width="28" height="28"><rect width="28" height="28" rx="6" fill="#fff" opacity="0.06"/></svg>';
+  const bubble = el('div','bubble ' + (who==='user' ? 'user' : ''));
+  if(typing){ bubble.innerHTML=''; const t=el('div','typing'); bubble.appendChild(t); } else bubble.innerHTML = text.replace(/\n/g,'<br/>');
+  wrap.appendChild(avatar); wrap.appendChild(bubble); chatEl.appendChild(wrap); chatEl.scrollTop = chatEl.scrollHeight;
+  return {wrap,bubble};
+}
+
+/* KB toggle */
+document.getElementById('toggleKb').addEventListener('click', ()=> {
+  const kb = document.getElementById('kb');
+  kb.style.display = kb.style.display === 'none' ? 'block' : 'none';
+});
+
+/* modes */
+document.querySelectorAll('.mode').forEach(m=>m.addEventListener('click', ()=>{
+  document.querySelectorAll('.mode').forEach(x=>x.classList.remove('active')); m.classList.add('active');
+}));
+
+/* sample */
+function useSample(t){ inputEl.value = t; inputEl.focus(); }
+
+/* send */
+document.getElementById('sendBtn').addEventListener('click', sendMessage);
+document.getElementById('clearBtn').addEventListener('click', ()=>{ chatEl.innerHTML=''; });
+document.getElementById('downloadBtn').addEventListener('click', ()=> {
+  const html = '<!doctype html>\n' + document.documentElement.outerHTML;
+  const blob = new Blob([html], {type:'text/html'}); const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download='study-buddy-prototype.html'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+});
+
+/* Upload PDF */
+document.getElementById('uploadPdfBtn').addEventListener('click', async ()=>{
+  const f = document.getElementById('pdfFile').files[0];
+  if(!f){ alert('Select a PDF first.'); return; }
+  addMessage({who:'user', text:`[Uploaded PDF] ${f.name}`});
+  const typing = addMessage({who:'assistant', typing:true});
+  try{
+    if(document.getElementById('useBackend').checked && state.apiRoot){
+      const form = new FormData(); form.append('file', f);
+      const res = await fetch(state.apiRoot + '/extract_pdf', { method:'POST', body: form });
+      if(!res.ok) throw new Error(await res.text());
+      const data = await res.json();
+      typing.bubble.innerHTML = `Extracted text (${data.excerpt_length} chars). Use "Explain" or "Quiz" on this content.`;
+      // optionally auto-insert into input
+      inputEl.value = data.excerpt;
+    } else {
+      // demo: read first ~2000 chars client-side (small)
+      const buffer = await f.arrayBuffer();
+      // cannot parse PDF client-side reliably here; so we provide a demo summary note
+      typing.bubble.innerHTML = 'Demo extract: Running offline demo extractor. For robust extraction, enable backend.';
+    }
+  } catch(e){
+    typing.bubble.innerHTML = 'Error extracting PDF: ' + e.message;
+  }
+});
+
+/* Demo extract button (fills demo text) */
+document.getElementById('extractDemoBtn').addEventListener('click', ()=> {
+  inputEl.value = 'Paste or type long notes here. This demo will summarize and create flashcards if requested.';
+  toast('Demo notes inserted');
+});
+
+/* Export Flashcards (CSV) */
+let lastFlashcards = []; // [{q,a}]
+document.getElementById('exportFlashcardsBtn').addEventListener('click', ()=>{
+  if(!lastFlashcards.length){ alert('No flashcards to export. Generate a quiz/flashcards first.'); return; }
+  const rows = [['Front','Back'], ...lastFlashcards.map(f=>[escapeCsv(f.q), escapeCsv(f.a)])];
+  const csv = rows.map(r=>r.join(',')).join('\n');
+  const blob = new Blob([csv], {type:'text/csv'}); const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'flashcards.csv'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+});
+function escapeCsv(s){ if(!s) return '""'; return '"' + s.replace(/"/g,'""') + '"'; }
+
+/* send flow */
+async function sendMessage(){
+  if(state.running) return; const text = inputEl.value.trim(); if(!text) return toast('Please add text or notes.');
+  addMessage({who:'user', text}); inputEl.value=''; const typingNode = addMessage({who:'assistant', typing:true}); state.running=true;
+  const mode = document.querySelector('.mode.active').getAttribute('data-mode');
+  try{
+    let responseText;
+    if(document.getElementById('useBackend').checked && state.apiRoot){
+      // send to backend proxy
+      const r = await fetch(state.apiRoot + '/ask', {
+        method:'POST', headers:{ 'Content-Type':'application/json' },
+        body: JSON.stringify({ text, mode })
+      });
+      if(!r.ok) throw new Error(await r.text());
+      const data = await r.json();
+      responseText = data.output;
+      if(data.flashcards) lastFlashcards = data.flashcards; // save for export
+    } else {
+      // demo fallback
+      responseText = simulatedReply(text, mode);
+      if(mode==='quiz'){
+        lastFlashcards = [
+          {q:'(demo) What is 1+1?', a:'2'},
+          {q:'(demo) Define photosynthesis in one sentence', a:'Plants convert light into chemical energy.'}
+        ];
+      }
+      await new Promise(r=>setTimeout(r, 500 + Math.random()*800));
+    }
+    typingNode.bubble.innerHTML = responseText.replace(/\n/g,'<br/>');
+  } catch(e){
+    typingNode.bubble.innerHTML = 'Error: ' + e.message;
+  } finally {
+    state.running=false; chatEl.scrollTop = chatEl.scrollHeight;
+  }
+}
+
+/* Simulated reply (demo) */
+function simulatedReply(text, mode){
+  if(mode==='quiz') return 'Demo Quiz:\n1) Q? — A: ...\n2) Q? — A: ...\n(Use Export Flashcards to download CSV.)';
+  if(mode==='tutor') return 'Demo Tutor: What is your current understanding? Try to summarize in one sentence.';
+  return 'Demo Explain: Short explanation and example.\n• Key idea\n• Example\n• Try solving one question now.';
+}
+
+/* Settings & modal */
+function openSettings(){ openModal(`<h2 style="margin-top:0">Settings</h2><p style="color:#bfc8cf">For live mode run the backend and set API key server-side (see README). Toggle "Use backend" when backend is available.</p><div style="text-align:right"><button class="btn" onclick="closeModal()">Close</button></div>`); }
+function openModal(html){ document.getElementById('modal').innerHTML = html; document.getElementById('modalRoot').style.display = 'flex'; }
+function closeModal(){ document.getElementById('modalRoot').style.display = 'none'; }
+
+/* small toast */
+function toast(msg){ const t = el('div',null,msg); Object.assign(t.style,{position:'fixed',right:'20px',bottom:'20px',padding:'10px 14px',background:'#111827',borderRadius:'10px',color:'#fff'}); document.body.appendChild(t); setTimeout(()=>t.style.opacity=0,2400); setTimeout(()=>t.remove(),3000); }
+
+/* accessibility: ctrl+enter to send */
+inputEl.addEventListener('keydown', e=>{ if(e.key==='Enter' && (e.ctrlKey||e.metaKey)) sendMessage(); });
+
+/* startup onboarding */
+window.addEventListener('load', ()=> openModal(`<h2 style="margin-top:0">Welcome to Study Buddy</h2><p style="color:#bfc8cf">This starter includes both demo and live mode. Run the backend to enable live AI responses and PDF extraction. Export flashcards as CSV for Anki import.</p><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px"><button class="btn" onclick="closeModal()">Continue</button></div>`));
+</script>
+</body>
+</html>
 
